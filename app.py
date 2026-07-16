@@ -3,21 +3,44 @@ import pandas as pd
 import numpy as np
 import joblib
 
-# -------------------- Load Model --------------------
+# ==========================
+# Load Saved Files
+# ==========================
 
 model = joblib.load("heart_model.pkl")
 scaler = joblib.load("scaler.pkl")
 feature_names = joblib.load("feature_names.pkl")
 
+# ==========================
+# Streamlit Page Settings
+# ==========================
+
 st.set_page_config(
     page_title="Heart Disease Prediction System",
+    page_icon="❤️",
     layout="centered"
 )
 
-st.title("❤️ Heart Disease Prediction System")
-st.write("Enter the patient details below.")
+# ==========================
+# Title
+# ==========================
 
-# -------------------- User Inputs --------------------
+st.title("❤️ Heart Disease Prediction System")
+
+st.write(
+    "Enter the patient's medical details below to predict the likelihood of heart disease."
+)
+
+st.markdown("---")
+
+# ==========================
+# Patient Details
+# ==========================
+
+st.header("Patient Details")
+# ==========================
+# Input Fields
+# ==========================
 
 age = st.number_input(
     "Age",
@@ -42,21 +65,21 @@ cp = st.selectbox(
 )
 
 trestbps = st.number_input(
-    "Resting Blood Pressure",
+    "Resting Blood Pressure (mmHg)",
     min_value=80,
     max_value=250,
     value=120
 )
 
 chol = st.number_input(
-    "Cholesterol",
+    "Cholesterol (mg/dL)",
     min_value=100,
     max_value=600,
     value=200
 )
 
 fbs = st.selectbox(
-    "Fasting Blood Sugar > 120 mg/dl",
+    "Fasting Blood Sugar > 120 mg/dL",
     ["No", "Yes"]
 )
 
@@ -68,12 +91,16 @@ restecg = st.selectbox(
         "Left Ventricular Hypertrophy"
     ]
 )
-
 thalach = st.number_input(
-    "Maximum Heart Rate",
+    "Maximum Heart Rate Achieved",
     min_value=50,
     max_value=250,
     value=150
+)
+
+exang = st.selectbox(
+    "Exercise Induced Angina",
+    ["No", "Yes"]
 )
 
 oldpeak = st.number_input(
@@ -82,11 +109,6 @@ oldpeak = st.number_input(
     max_value=10.0,
     value=1.0,
     step=0.1
-)
-
-exang = st.selectbox(
-    "Exercise Induced Angina",
-    ["No", "Yes"]
 )
 
 slope = st.selectbox(
@@ -108,7 +130,11 @@ thal = st.selectbox(
     [0, 1, 2, 3]
 )
 
-# -------------------- Predict --------------------
+st.markdown("---")
+
+# ==========================
+# Prediction
+# ==========================
 
 if st.button("Predict"):
 
@@ -118,7 +144,6 @@ if st.button("Predict"):
     )
 
     # Numerical Features
-
     input_data["age"] = age
     input_data["trestbps"] = trestbps
     input_data["chol"] = chol
@@ -126,7 +151,6 @@ if st.button("Predict"):
     input_data["oldpeak"] = oldpeak
 
     # Scale Numerical Features
-
     input_data[
         ["age", "trestbps", "chol", "thalach", "oldpeak"]
     ] = scaler.transform(
@@ -134,7 +158,9 @@ if st.button("Predict"):
             ["age", "trestbps", "chol", "thalach", "oldpeak"]
         ]
     )
-        # -------------------- One-Hot Encoding --------------------
+        # ==========================
+    # One-Hot Encoding
+    # ==========================
 
     # Gender
     gender_value = 1 if sex == "Male" else 0
@@ -178,8 +204,9 @@ if st.button("Predict"):
 
     # Thalassemia
     input_data[f"thal_{thal}"] = 1
-
-    # -------------------- Prediction --------------------
+        # ==========================
+    # Prediction
+    # ==========================
 
     prediction = model.predict(input_data)[0]
     probabilities = model.predict_proba(input_data)[0]
@@ -187,11 +214,7 @@ if st.button("Predict"):
     if prediction == 0:
         confidence = probabilities[0] * 100
         disease = "No Heart Disease"
-
-        if confidence >= 80:
-            risk = "🟢 Low Risk"
-        else:
-            risk = "🟡 Medium Risk"
+        risk = "🟢 Low Risk"
 
         st.success(f"💚 Prediction: {disease}")
 
@@ -210,7 +233,9 @@ if st.button("Predict"):
     st.write(f"### Risk Level: {risk}")
 
     st.markdown("---")
-        # -------------------- Possible Risk Factors --------------------
+        # ==========================
+    # Possible Risk Factors
+    # ==========================
 
     st.subheader("Possible Risk Factors")
 
@@ -218,104 +243,116 @@ if st.button("Predict"):
 
     if age >= 60:
         risk_found = True
-        st.write("👴 **Age Above 60 Years**")
+        st.write(f"👴 **Age:** {age} years (Higher age increases heart disease risk)")
 
     if trestbps > 140:
         risk_found = True
-        st.write("🩸 **High Resting Blood Pressure Detected**")
+        st.write(f"🩸 **Resting Blood Pressure:** {trestbps} mmHg (High)")
 
     if chol > 240:
         risk_found = True
-        st.write("🫀 **High Cholesterol Level Detected**")
+        st.write(f"🫀 **Cholesterol:** {chol} mg/dL (High)")
 
     if oldpeak > 2:
         risk_found = True
-        st.write("📈 **High Oldpeak Value Detected**")
+        st.write(f"📈 **Oldpeak:** {oldpeak} (High)")
 
     if exang == "Yes":
         risk_found = True
-        st.write("🏃 **Exercise-Induced Angina Detected**")
+        st.write("🏃 **Exercise-Induced Angina:** Yes")
 
     if fbs == "Yes":
         risk_found = True
-        st.write("🍬 **High Fasting Blood Sugar Detected**")
+        st.write("🍬 **Fasting Blood Sugar:** Above 120 mg/dL")
 
     if not risk_found:
-        st.success("✅ No major risk factors identified from the entered values.")
+        st.success("✅ No significant risk factors identified from the entered values.")
 
     st.markdown("---")
-
-    # -------------------- Risk-Based Precautions --------------------
+        # ==========================
+    # Risk-Based Precautions
+    # ==========================
 
     st.subheader("Risk-Based Precautions")
 
+    precautions_given = False
+
     if chol > 240:
-        st.write("🫀 **For High Cholesterol:**")
-        st.write("• Reduce fried and oily foods.")
-        st.write("• Eat more fruits, vegetables and whole grains.")
-        st.write("• Exercise regularly.")
-        st.write("• Monitor cholesterol periodically.")
+        precautions_given = True
+        st.write("🫀 **High Cholesterol**")
+        st.write("• Reduce fried, oily, and high-fat foods.")
+        st.write("• Eat more fruits, vegetables, and whole grains.")
+        st.write("• Exercise regularly (as advised by your doctor).")
+        st.write("• Monitor your cholesterol levels regularly.")
         st.write("")
 
     if trestbps > 140:
-        st.write("🩸 **For High Blood Pressure:**")
+        precautions_given = True
+        st.write("🩸 **High Blood Pressure**")
         st.write("• Reduce salt intake.")
-        st.write("• Avoid excessive stress.")
-        st.write("• Monitor blood pressure regularly.")
-        st.write("• Take medicines as prescribed by your doctor.")
+        st.write("• Avoid stress whenever possible.")
+        st.write("• Monitor your blood pressure regularly.")
+        st.write("• Take medications as prescribed.")
         st.write("")
 
     if oldpeak > 2:
-        st.write("📈 **For High Oldpeak:**")
-        st.write("• Avoid heavy physical exertion.")
+        precautions_given = True
+        st.write("📈 **High Oldpeak**")
+        st.write("• Avoid strenuous physical activity until medically evaluated.")
         st.write("• Consult a cardiologist.")
-        st.write("• Follow medical advice for ECG evaluation.")
+        st.write("• Follow your doctor's advice regarding further heart tests.")
         st.write("")
+
     if exang == "Yes":
-        st.write("🏃 **For Exercise-Induced Angina:**")
-        st.write("• Avoid strenuous physical activities.")
-        st.write("• Stop exercising immediately if chest pain occurs.")
-        st.write("• Consult a cardiologist before starting an exercise program.")
+        precautions_given = True
+        st.write("🏃 **Exercise-Induced Angina**")
+        st.write("• Avoid heavy exercise until you have medical clearance.")
+        st.write("• Stop exercising if chest pain occurs.")
+        st.write("• Consult a cardiologist before starting a new exercise program.")
         st.write("")
 
     if fbs == "Yes":
-        st.write("🍬 **For High Fasting Blood Sugar:**")
+        precautions_given = True
+        st.write("🍬 **High Fasting Blood Sugar**")
         st.write("• Reduce sugar and refined carbohydrate intake.")
-        st.write("• Follow a balanced diabetic-friendly diet.")
-        st.write("• Exercise regularly as advised by your doctor.")
-        st.write("• Monitor your blood sugar levels regularly.")
+        st.write("• Follow a balanced diet.")
+        st.write("• Monitor blood sugar regularly.")
+        st.write("• Exercise as recommended by your doctor.")
         st.write("")
 
     if age >= 60:
-        st.write("👴 **For Age Above 60 Years:**")
+        precautions_given = True
+        st.write("👴 **Age Above 60 Years**")
         st.write("• Schedule regular heart health check-ups.")
-        st.write("• Maintain a healthy lifestyle.")
         st.write("• Stay physically active according to your doctor's advice.")
+        st.write("• Monitor blood pressure and cholesterol routinely.")
         st.write("")
 
-    if (
-        chol <= 240 and
-        trestbps <= 140 and
-        oldpeak <= 2 and
-        exang == "No" and
-        fbs == "No" and
-        age < 60
-    ):
+    if not precautions_given:
         st.success("✅ No specific precautions are required based on the entered values.")
         st.write("• Continue maintaining a healthy lifestyle.")
         st.write("• Eat a balanced diet.")
         st.write("• Exercise regularly.")
-        st.write("• Get routine medical check-ups.")
+        st.write("• Go for routine health check-ups.")
 
     st.markdown("---")
+        # ==========================
+    # Final Recommendation
+    # ==========================
 
     if prediction == 1:
         st.warning(
-            "⚠️ This prediction is generated by a machine learning model and is not a medical diagnosis. "
-            "Please consult a qualified healthcare professional for proper evaluation."
+            "⚠️ **Disclaimer:** This prediction is generated by a machine learning model and is not a medical diagnosis. "
+            "Please consult a qualified healthcare professional for proper medical evaluation and treatment."
         )
     else:
         st.info(
-            "💚 The prediction indicates a low likelihood of heart disease. "
+            "💚 The model predicts a low likelihood of heart disease based on the entered values. "
             "Continue maintaining a healthy lifestyle and attend regular health check-ups."
         )
+
+    st.markdown("---")
+
+    st.caption(
+        "Developed using Machine Learning (K-Nearest Neighbors) and Streamlit for educational purposes."
+    )
