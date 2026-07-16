@@ -17,7 +17,7 @@ feature_names = joblib.load("feature_names.pkl")
 
 st.set_page_config(
     page_title="Heart Disease Prediction System",
-    page_icon="❤️",
+    page_icon="🫀",
     layout="centered"
 )
 
@@ -25,7 +25,7 @@ st.set_page_config(
 # Title
 # ==========================
 
-st.title("❤️ Heart Disease Prediction System")
+st.title("🫀 Heart Disease Prediction System")
 
 st.write(
     "Enter the patient's medical details below to predict the likelihood of heart disease."
@@ -227,7 +227,7 @@ if st.button("Predict"):
         else:
             risk = "🟡 Medium Risk"
 
-        st.error(f"❤️ Prediction: {disease}")
+        st.error(f"🫀 Prediction: {disease}")
 
     st.write(f"### Confidence: {confidence:.2f}%")
     st.write(f"### Risk Level: {risk}")
