@@ -229,7 +229,7 @@ if st.button("Predict"):
 
         st.error(f"🫀 Prediction: {disease}")
 
-    st.write(f"### Confidence: {confidence:.2f}%")
+    #st.write(f"### Confidence: {confidence:.2f}%")
     st.write(f"### Risk Level: {risk}")
 
     st.markdown("---")
