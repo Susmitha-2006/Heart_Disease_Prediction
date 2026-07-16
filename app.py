@@ -20,6 +20,13 @@ st.set_page_config(
     page_icon="🫀",
     layout="centered"
 )
+st.markdown("""
+<style>
+a {
+    display: none;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ==========================
 # Title
