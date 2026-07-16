@@ -271,7 +271,7 @@ if st.button("Predict"):
         st.write("• Consult a cardiologist.")
         st.write("• Follow medical advice for ECG evaluation.")
         st.write("")
-        if exang == "Yes":
+    if exang == "Yes":
         st.write("🏃 **For Exercise-Induced Angina:**")
         st.write("• Avoid strenuous physical activities.")
         st.write("• Stop exercising immediately if chest pain occurs.")
