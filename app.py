@@ -99,7 +99,6 @@ if st.button("Predict"):
     )
 
     # One-Hot Encoding
-
     input_data[f"sex_{1 if sex=='Male' else 0}"] = 1
 
     cp_map = {
@@ -131,25 +130,35 @@ if st.button("Predict"):
     input_data[f"ca_{ca}"] = 1
 
     input_data[f"thal_{thal}"] = 1
-        # -------------------- Prediction --------------------
+    # -------------------- Prediction --------------------
 
     prediction = model.predict(input_data)[0]
+    probabilities = model.predict_proba(input_data)[0]
 
-    probability = model.predict_proba(input_data)[0][1] * 100
-
-    if probability < 30:
+    if prediction == 0:
+        confidence = probabilities[0] * 100
+        disease = "No Heart Disease"
         risk = "🟢 Low Risk"
-    elif probability < 70:
-        risk = "🟡 Medium Risk"
     else:
-        risk = "🔴 High Risk"
+        confidence = probabilities[1] * 100
+        disease = "Heart Disease"
+
+        if confidence < 60:
+            risk = "🟡 Medium Risk"
+        else:
+            risk = "🔴 High Risk"
 
     st.markdown("---")
 
-    if prediction == 1:
-        st.error("❤️ Prediction: Heart Disease Detected")
+    if prediction == 0:
+        st.success(f"💚 Prediction: {disease}")
     else:
-        st.success("💚 Prediction: No Heart Disease")
+        st.error(f"❤️ Prediction: {disease}")
 
-    st.write(f"### Confidence: {probability:.2f}%")
+    st.write(f"### Confidence: {confidence:.2f}%")
     st.write(f"### Risk Level: {risk}")
+
+    if prediction == 0:
+        st.info("The model predicts that the patient is unlikely to have heart disease based on the entered values.")
+    else:
+        st.warning("The model predicts that the patient may have heart disease. Please consult a healthcare professional for proper medical evaluation.")
