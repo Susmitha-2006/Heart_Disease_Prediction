@@ -3,57 +3,46 @@ import pandas as pd
 import numpy as np
 import joblib
 
-# ==========================
-# Load Saved Files
-# ==========================
+# =====================================
+# Load Saved Model
+# =====================================
 
 model = joblib.load("heart_model.pkl")
 scaler = joblib.load("scaler.pkl")
 feature_names = joblib.load("feature_names.pkl")
 
-# ==========================
-# Streamlit Page Settings
-# ==========================
+# =====================================
+# Page Configuration
+# =====================================
 
 st.set_page_config(
     page_title="Heart Disease Prediction System",
-    page_icon="🫀",
+    page_icon="❤️",
     layout="centered"
 )
+
+st.title("❤️ Heart Disease Prediction System")
+
 st.markdown("""
-<style>
-a {
-    display: none;
-}
-</style>
-""", unsafe_allow_html=True)
+This application predicts whether a patient is likely to have **Heart Disease**
+using a trained **Random Forest Machine Learning model**.
 
-# ==========================
-# Title
-# ==========================
-
-st.title("🫀 Heart Disease Prediction System")
-
-st.write(
-    "Enter the patient's medical details below to predict the likelihood of heart disease."
-)
+Fill in the patient's medical details below and click **Predict**.
+""")
 
 st.markdown("---")
 
-# ==========================
+# =====================================
 # Patient Details
-# ==========================
+# =====================================
 
-st.header("Patient Details")
-# ==========================
-# Input Fields
-# ==========================
+st.header("🩺 Patient Information")
 
 age = st.number_input(
     "Age",
     min_value=1,
     max_value=120,
-    value=50
+    value=45
 )
 
 sex = st.selectbox(
@@ -79,7 +68,7 @@ trestbps = st.number_input(
 )
 
 chol = st.number_input(
-    "Cholesterol (mg/dL)",
+    "Serum Cholesterol (mg/dL)",
     min_value=100,
     max_value=600,
     value=200
@@ -98,6 +87,7 @@ restecg = st.selectbox(
         "Left Ventricular Hypertrophy"
     ]
 )
+
 thalach = st.number_input(
     "Maximum Heart Rate Achieved",
     min_value=50,
@@ -119,7 +109,7 @@ oldpeak = st.number_input(
 )
 
 slope = st.selectbox(
-    "Slope",
+    "Slope of Peak Exercise ST Segment",
     [
         "Upsloping",
         "Flat",
@@ -129,74 +119,94 @@ slope = st.selectbox(
 
 ca = st.selectbox(
     "Number of Major Vessels",
-    [0, 1, 2, 3, 4]
+    [0,1,2,3,4]
 )
 
 thal = st.selectbox(
     "Thalassemia",
-    [0, 1, 2, 3]
+    [0,1,2,3]
 )
 
 st.markdown("---")
-
-# ==========================
+# =====================================
 # Prediction
-# ==========================
+# =====================================
 
-if st.button("Predict"):
+if st.button("🔍 Predict"):
 
+    # Create input dataframe with all training features
     input_data = pd.DataFrame(
         np.zeros((1, len(feature_names))),
         columns=feature_names
     )
 
+    # =====================================
     # Numerical Features
+    # =====================================
+
     input_data["age"] = age
     input_data["trestbps"] = trestbps
     input_data["chol"] = chol
     input_data["thalach"] = thalach
     input_data["oldpeak"] = oldpeak
 
-    # Scale Numerical Features
-    input_data[
-        ["age", "trestbps", "chol", "thalach", "oldpeak"]
-    ] = scaler.transform(
-        input_data[
-            ["age", "trestbps", "chol", "thalach", "oldpeak"]
-        ]
+    # Scale numerical columns
+    numerical_columns = [
+        "age",
+        "trestbps",
+        "chol",
+        "thalach",
+        "oldpeak"
+    ]
+
+    input_data[numerical_columns] = scaler.transform(
+        input_data[numerical_columns]
     )
-        # ==========================
-    # One-Hot Encoding
-    # ==========================
+
+    # =====================================
+    # One Hot Encoding
+    # =====================================
 
     # Gender
-    gender_value = 1 if sex == "Male" else 0
-    input_data[f"sex_{gender_value}"] = 1
+    gender = 1 if sex == "Male" else 0
+    col = f"sex_{gender}"
+    if col in input_data.columns:
+        input_data[col] = 1
 
-    # Chest Pain Type
+    # Chest Pain
     cp_map = {
         "Typical Angina": 0,
         "Atypical Angina": 1,
         "Non-anginal Pain": 2,
         "Asymptomatic": 3
     }
-    input_data[f"cp_{cp_map[cp]}"] = 1
 
-    # Fasting Blood Sugar
+    col = f"cp_{cp_map[cp]}"
+    if col in input_data.columns:
+        input_data[col] = 1
+
+    # FBS
     fbs_value = 1 if fbs == "Yes" else 0
-    input_data[f"fbs_{fbs_value}"] = 1
+    col = f"fbs_{fbs_value}"
+    if col in input_data.columns:
+        input_data[col] = 1
 
-    # Resting ECG
+    # Rest ECG
     restecg_map = {
         "Normal": 0,
         "ST-T Wave Abnormality": 1,
         "Left Ventricular Hypertrophy": 2
     }
-    input_data[f"restecg_{restecg_map[restecg]}"] = 1
 
-    # Exercise-Induced Angina
+    col = f"restecg_{restecg_map[restecg]}"
+    if col in input_data.columns:
+        input_data[col] = 1
+
+    # Exercise Angina
     exang_value = 1 if exang == "Yes" else 0
-    input_data[f"exang_{exang_value}"] = 1
+    col = f"exang_{exang_value}"
+    if col in input_data.columns:
+        input_data[col] = 1
 
     # Slope
     slope_map = {
@@ -204,221 +214,231 @@ if st.button("Predict"):
         "Flat": 1,
         "Downsloping": 2
     }
-    input_data[f"slope_{slope_map[slope]}"] = 1
 
-    # Number of Major Vessels
-    input_data[f"ca_{ca}"] = 1
+    col = f"slope_{slope_map[slope]}"
+    if col in input_data.columns:
+        input_data[col] = 1
 
-    # Thalassemia
-    input_data[f"thal_{thal}"] = 1
-        # ==========================
+    # CA
+    col = f"ca_{ca}"
+    if col in input_data.columns:
+        input_data[col] = 1
+
+    # Thal
+    col = f"thal_{thal}"
+    if col in input_data.columns:
+        input_data[col] = 1
+
+    # Final feature order
+    input_data = input_data[feature_names]
+
+    # =====================================
     # Prediction
-    # ==========================
+    # =====================================
 
     prediction = model.predict(input_data)[0]
-probabilities = model.predict_proba(input_data)[0]
+    probability = model.predict_proba(input_data)[0]
 
-# -------------------------
-# Disease Prediction
-# -------------------------
+    if prediction == 0:
 
-if prediction == 0:
-    confidence = probabilities[0] * 100
-    disease = "No Heart Disease"
+        confidence = probability[0] * 100
 
-    st.success(f"💚 Prediction: {disease}")
+        st.success("## 💚 Prediction : No Heart Disease")
 
-else:
-    confidence = probabilities[1] * 100
-    disease = "Heart Disease"
+        if confidence >= 90:
+            risk = "🟢 Very Low Risk"
+        elif confidence >= 70:
+            risk = "🟢 Low Risk"
+        else:
+            risk = "🟡 Medium Risk"
 
-    st.error(f"❤️ Prediction: {disease}")
+    else:
 
-# -------------------------
-# Risk Score Calculation
-# -------------------------
+        confidence = probability[1] * 100
 
-risk_score = 0
+        st.error("## ❤️ Prediction : Heart Disease")
 
-# Age
-if age >= 60:
-    risk_score += 1
+        if confidence >= 90:
+            risk = "🔴 Very High Risk"
+        elif confidence >= 70:
+            risk = "🔴 High Risk"
+        else:
+            risk = "🟡 Medium Risk"
 
-# Blood Pressure
-if trestbps >= 140:
-    risk_score += 1
+    st.write(f"### Confidence : {confidence:.2f}%")
+    st.write(f"### Risk Level : {risk}")
 
-# Cholesterol
-if chol >= 240:
-    risk_score += 1
-
-# Fasting Blood Sugar
-if fbs == "Yes":
-    risk_score += 1
-
-# Exercise-Induced Angina
-if exang == "Yes":
-    risk_score += 1
-
-# Oldpeak
-if oldpeak >= 2:
-    risk_score += 1
-
-# Number of Major Vessels
-if ca >= 2:
-    risk_score += 1
-
-# Chest Pain
-if cp == "Asymptomatic":
-    risk_score += 2
-elif cp == "Non-anginal Pain":
-    risk_score += 1
-
-# Maximum Heart Rate
-if thalach < 120:
-    risk_score += 1
-
-# Model Prediction
-if prediction == 1:
-    risk_score += 2
-
-# -------------------------
-# Final Risk Level
-# -------------------------
-
-if risk_score <= 2:
-    risk = "🟢 Low Risk"
-
-elif risk_score <= 5:
-    risk = "🟡 Medium Risk"
-
-else:
-    risk = "🔴 High Risk"
-
-st.write(f"### Confidence: {confidence:.2f}%")
-st.write(f"### Estimated Risk Level: {risk}")
-
-st.markdown("---")
-        # ==========================
+    st.markdown("---")
+        # =====================================
     # Possible Risk Factors
-    # ==========================
+    # =====================================
 
-st.subheader("Possible Risk Factors")
+    st.subheader("🩺 Possible Risk Factors")
 
-risk_found = False
+    risk_found = False
 
-if age >= 60:
+    if age >= 60:
         risk_found = True
-        st.write(f"👴 **Age:** {age} years (Higher age increases heart disease risk)")
+        st.write("👴 **Age:** Higher age increases the possibility of heart disease.")
 
-if trestbps > 140:
+    if trestbps > 140:
         risk_found = True
-        st.write(f"🩸 **Resting Blood Pressure:** {trestbps} mmHg (High)")
+        st.write(f"🩸 **High Blood Pressure:** {trestbps} mmHg")
 
-if chol > 240:
+    if chol > 240:
         risk_found = True
-        st.write(f"🫀 **Cholesterol:** {chol} mg/dL (High)")
+        st.write(f"🧈 **High Cholesterol:** {chol} mg/dL")
 
-if oldpeak > 2:
+    if thalach < 100:
         risk_found = True
-        st.write(f"📈 **Oldpeak:** {oldpeak} (High)")
+        st.write(f"❤️ **Low Maximum Heart Rate:** {thalach}")
 
-if exang == "Yes":
+    if oldpeak > 2:
         risk_found = True
-        st.write("🏃 **Exercise-Induced Angina:** Yes")
+        st.write(f"📈 **Oldpeak:** {oldpeak}")
 
-if fbs == "Yes":
+    if exang == "Yes":
         risk_found = True
-        st.write("🍬 **Fasting Blood Sugar:** Above 120 mg/dL")
+        st.write("🏃 **Exercise-Induced Angina:** Present")
 
-if not risk_found:
-        st.success("✅ No significant risk factors identified from the entered values.")
-
-st.markdown("---")
-        # ==========================
-    # Risk-Based Precautions
-    # ==========================
-
-st.subheader("Risk-Based Precautions")
-
-precautions_given = False
-
-if chol > 240:
-        precautions_given = True
-        st.write("🫀 **High Cholesterol**")
-        st.write("• Reduce fried, oily, and high-fat foods.")
-        st.write("• Eat more fruits, vegetables, and whole grains.")
-        st.write("• Exercise regularly (as advised by your doctor).")
-        st.write("• Monitor your cholesterol levels regularly.")
-        st.write("")
-
-if trestbps > 140:
-        precautions_given = True
-        st.write("🩸 **High Blood Pressure**")
-        st.write("• Reduce salt intake.")
-        st.write("• Avoid stress whenever possible.")
-        st.write("• Monitor your blood pressure regularly.")
-        st.write("• Take medications as prescribed.")
-        st.write("")
-
-if oldpeak > 2:
-        precautions_given = True
-        st.write("📈 **High Oldpeak**")
-        st.write("• Avoid strenuous physical activity until medically evaluated.")
-        st.write("• Consult a cardiologist.")
-        st.write("• Follow your doctor's advice regarding further heart tests.")
-        st.write("")
-
-if exang == "Yes":
-        precautions_given = True
-        st.write("🏃 **Exercise-Induced Angina**")
-        st.write("• Avoid heavy exercise until you have medical clearance.")
-        st.write("• Stop exercising if chest pain occurs.")
-        st.write("• Consult a cardiologist before starting a new exercise program.")
-        st.write("")
-
-if fbs == "Yes":
-        precautions_given = True
+    if fbs == "Yes":
+        risk_found = True
         st.write("🍬 **High Fasting Blood Sugar**")
-        st.write("• Reduce sugar and refined carbohydrate intake.")
-        st.write("• Follow a balanced diet.")
-        st.write("• Monitor blood sugar regularly.")
-        st.write("• Exercise as recommended by your doctor.")
-        st.write("")
 
-if age >= 60:
-        precautions_given = True
-        st.write("👴 **Age Above 60 Years**")
-        st.write("• Schedule regular heart health check-ups.")
-        st.write("• Stay physically active according to your doctor's advice.")
-        st.write("• Monitor blood pressure and cholesterol routinely.")
-        st.write("")
+    if cp == "Asymptomatic":
+        risk_found = True
+        st.write("⚠️ **Asymptomatic Chest Pain:** Higher clinical risk.")
 
-if not precautions_given:
-        st.success("✅ No specific precautions are required based on the entered values.")
-        st.write("• Continue maintaining a healthy lifestyle.")
-        st.write("• Eat a balanced diet.")
-        st.write("• Exercise regularly.")
-        st.write("• Go for routine health check-ups.")
+    if ca >= 2:
+        risk_found = True
+        st.write(f"🫀 **Major Vessels Affected:** {ca}")
 
-st.markdown("---")
-        # ==========================
+    if thal == 3:
+        risk_found = True
+        st.write("🧬 **Abnormal Thalassemia Result**")
+
+    if not risk_found:
+        st.success("✅ No major risk factors detected from the entered values.")
+
+    st.markdown("---")
+
+    # =====================================
+    # Precautions
+    # =====================================
+
+    st.subheader("💡 Recommended Precautions")
+
+    precautions = []
+
+    if chol > 240:
+        precautions.extend([
+            "Reduce oily and fried foods.",
+            "Eat fruits, vegetables and whole grains.",
+            "Exercise regularly."
+        ])
+
+    if trestbps > 140:
+        precautions.extend([
+            "Reduce salt intake.",
+            "Monitor blood pressure regularly.",
+            "Manage stress."
+        ])
+
+    if fbs == "Yes":
+        precautions.extend([
+            "Reduce sugar intake.",
+            "Monitor blood glucose levels.",
+            "Maintain a healthy diet."
+        ])
+
+    if oldpeak > 2:
+        precautions.extend([
+            "Consult a cardiologist.",
+            "Avoid strenuous physical activity until medically evaluated."
+        ])
+
+    if exang == "Yes":
+        precautions.extend([
+            "Avoid heavy exercise.",
+            "Stop activity immediately if chest pain occurs."
+        ])
+
+    if age >= 60:
+        precautions.extend([
+            "Schedule regular heart check-ups.",
+            "Maintain an active lifestyle."
+        ])
+
+    if prediction == 1:
+        precautions.extend([
+            "Take medications only as prescribed by your doctor.",
+            "Follow up with a cardiologist.",
+            "Do not ignore symptoms such as chest pain or breathlessness."
+        ])
+
+    precautions = list(dict.fromkeys(precautions))
+
+    if len(precautions) == 0:
+        st.success("✅ No special precautions are required.")
+        precautions = [
+            "Maintain a balanced diet.",
+            "Exercise regularly.",
+            "Avoid smoking and alcohol.",
+            "Drink adequate water.",
+            "Sleep for 7–8 hours daily."
+        ]
+
+    for item in precautions:
+        st.write("•", item)
+
+    st.markdown("---")
+
+    # =====================================
+    # Lifestyle Recommendations
+    # =====================================
+
+    st.subheader("🥗 Healthy Lifestyle Tips")
+
+    st.write("✅ Eat more fruits and vegetables.")
+    st.write("✅ Exercise for at least 30 minutes daily.")
+    st.write("✅ Maintain a healthy body weight.")
+    st.write("✅ Reduce stress through meditation or yoga.")
+    st.write("✅ Quit smoking and avoid alcohol.")
+    st.write("✅ Get sufficient sleep every day.")
+    st.write("✅ Drink enough water.")
+    st.write("✅ Go for regular health check-ups.")
+
+    st.markdown("---")
+
+    # =====================================
     # Final Recommendation
-    # ==========================
+    # =====================================
 
-if prediction == 1:
-        st.warning(
-            "⚠️ **Disclaimer:** This prediction is generated by a machine learning model and is not a medical diagnosis. "
-            "Please consult a qualified healthcare professional for proper medical evaluation and treatment."
-        )
-else:
-        st.info(
-            "💚 The model predicts a low likelihood of heart disease based on the entered values. "
-            "Continue maintaining a healthy lifestyle and attend regular health check-ups."
-        )
+    if prediction == 1:
 
-st.markdown("---")
+        st.warning("""
+### ⚠️ Medical Disclaimer
 
-st.caption(
-        "Developed using Machine Learning (K-Nearest Neighbors) and Streamlit for educational purposes."
+The model predicts a **higher likelihood of heart disease**.
+
+This prediction is generated using a Machine Learning model and **is not a medical diagnosis**.
+
+Please consult a qualified healthcare professional for proper medical evaluation and treatment.
+""")
+
+    else:
+
+        st.success("""
+### 💚 Good News
+
+The model predicts a **low likelihood of heart disease**.
+
+Continue maintaining a healthy lifestyle and undergo regular health check-ups.
+""")
+
+    st.markdown("---")
+
+    st.caption(
+        "Heart Disease Prediction System | Developed using Random Forest Classifier and Streamlit"
     )
+    
