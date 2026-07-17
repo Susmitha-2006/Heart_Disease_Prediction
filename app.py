@@ -235,7 +235,6 @@ if st.button("🔍 Predict"):
     # =====================================
     # Prediction
     # =====================================
-    st.write(input_data)
     prediction = model.predict(input_data)[0]
     probability = model.predict_proba(input_data)[0]
 
