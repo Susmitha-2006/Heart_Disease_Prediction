@@ -17,11 +17,11 @@ feature_names = joblib.load("feature_names.pkl")
 
 st.set_page_config(
     page_title="Heart Disease Prediction System",
-    page_icon="❤️",
+    page_icon="🫀",
     layout="centered"
 )
 
-st.title("❤️ Heart Disease Prediction System")
+st.title("🫀 Heart Disease Prediction System")
 
 st.markdown("""
 This application predicts whether a patient is likely to have **Heart Disease**
@@ -242,7 +242,7 @@ if st.button("🔍 Predict"):
 
         confidence = probability[0] * 100
 
-        st.success("## 💚 Prediction : No Heart Disease")
+        st.success("## 🫀 Prediction : No Heart Disease")
 
         if confidence >= 90:
             risk = "🟢 Very Low Risk"
@@ -255,7 +255,7 @@ if st.button("🔍 Predict"):
 
         confidence = probability[1] * 100
 
-        st.error("## ❤️ Prediction : Heart Disease")
+        st.error("## 🫀 Prediction : Heart Disease")
 
         if confidence >= 90:
             risk = "🔴 Very High Risk"
@@ -264,7 +264,7 @@ if st.button("🔍 Predict"):
         else:
             risk = "🟡 Medium Risk"
 
-    st.write(f"### Confidence : {confidence:.2f}%")
+    #st.write(f"### Confidence : {confidence:.2f}%")
     st.write(f"### Risk Level : {risk}")
 
     st.markdown("---")
@@ -290,7 +290,7 @@ if st.button("🔍 Predict"):
 
     if thalach < 100:
         risk_found = True
-        st.write(f"❤️ **Low Maximum Heart Rate:** {thalach}")
+        st.write(f"🫀 **Low Maximum Heart Rate:** {thalach}")
 
     if oldpeak > 2:
         risk_found = True
@@ -428,7 +428,7 @@ Please consult a qualified healthcare professional for proper medical evaluation
     else:
 
         st.success("""
-### 💚 Good News
+###  Good News
 
 The model predicts a **low likelihood of heart disease**.
 
