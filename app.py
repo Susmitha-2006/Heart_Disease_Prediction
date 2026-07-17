@@ -298,7 +298,7 @@ else:
 st.write(f"### Confidence: {confidence:.2f}%")
 st.write(f"### Estimated Risk Level: {risk}")
 
-    st.markdown("---")
+st.markdown("---")
         # ==========================
     # Possible Risk Factors
     # ==========================
