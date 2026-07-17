@@ -216,28 +216,87 @@ if st.button("Predict"):
     # ==========================
 
     prediction = model.predict(input_data)[0]
-    probabilities = model.predict_proba(input_data)[0]
+probabilities = model.predict_proba(input_data)[0]
 
-    if prediction == 0:
-        confidence = probabilities[0] * 100
-        disease = "No Heart Disease"
-        risk = "🟢 Low Risk"
+# -------------------------
+# Disease Prediction
+# -------------------------
 
-        st.success(f"💚 Prediction: {disease}")
+if prediction == 0:
+    confidence = probabilities[0] * 100
+    disease = "No Heart Disease"
 
-    else:
-        confidence = probabilities[1] * 100
-        disease = "Heart Disease"
+    st.success(f"💚 Prediction: {disease}")
 
-        if confidence >= 70:
-            risk = "🔴 High Risk"
-        else:
-            risk = "🟡 Medium Risk"
+else:
+    confidence = probabilities[1] * 100
+    disease = "Heart Disease"
 
-        st.error(f"🫀 Prediction: {disease}")
+    st.error(f"❤️ Prediction: {disease}")
 
-    #st.write(f"### Confidence: {confidence:.2f}%")
-    st.write(f"### Risk Level: {risk}")
+# -------------------------
+# Risk Score Calculation
+# -------------------------
+
+risk_score = 0
+
+# Age
+if age >= 60:
+    risk_score += 1
+
+# Blood Pressure
+if trestbps >= 140:
+    risk_score += 1
+
+# Cholesterol
+if chol >= 240:
+    risk_score += 1
+
+# Fasting Blood Sugar
+if fbs == "Yes":
+    risk_score += 1
+
+# Exercise-Induced Angina
+if exang == "Yes":
+    risk_score += 1
+
+# Oldpeak
+if oldpeak >= 2:
+    risk_score += 1
+
+# Number of Major Vessels
+if ca >= 2:
+    risk_score += 1
+
+# Chest Pain
+if cp == "Asymptomatic":
+    risk_score += 2
+elif cp == "Non-anginal Pain":
+    risk_score += 1
+
+# Maximum Heart Rate
+if thalach < 120:
+    risk_score += 1
+
+# Model Prediction
+if prediction == 1:
+    risk_score += 2
+
+# -------------------------
+# Final Risk Level
+# -------------------------
+
+if risk_score <= 2:
+    risk = "🟢 Low Risk"
+
+elif risk_score <= 5:
+    risk = "🟡 Medium Risk"
+
+else:
+    risk = "🔴 High Risk"
+
+st.write(f"### Confidence: {confidence:.2f}%")
+st.write(f"### Estimated Risk Level: {risk}")
 
     st.markdown("---")
         # ==========================
